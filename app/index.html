@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test Client</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #121212;
+            color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        button {
+            background-color: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0062a3;
+        }
+        #messages {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #1e1e1e;
+            border-left: 4px solid #007acc;
+            min-height: 50px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .status {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>WebSocket Tester</h2>
+    <div class="status" id="status">Connecting to server...</div>
+    
+    <button>Send "hello"</button>
+
+    <h3>Server Responses:</h3>
+    <div id="messages">Waiting for data...</div>
+
+    <script>
+        // 1. Establish the connection to your active Node.js server
+        const socket = new WebSocket('ws://localhost:8080');
+        const statusDiv = document.getElementById('status');
+        const messagesDiv = document.getElementById('messages');
+
+        // Update UI when connection opens
+        socket.onopen = () => {
+            statusDiv.textContent = 'Connected to port 8080 ✅';
+            statusDiv.style.color = '#4caf50';
+        };
+
+        // Update UI if connection fails
+        socket.onerror = () => {
+            statusDiv.textContent = 'Connection failed ❌ (Is your server running?)';
+            statusDiv.style.color = '#f44336';
+        };
+
+        // 2. Listen for messages returning from your backend server
+        socket.onmessage = ({ data }) => {
+            console.log('Message from server ', data);
+            
+            // Clear the placeholder text on the first message received
+            if (messagesDiv.textContent === 'Waiting for data...') {
+                messagesDiv.innerHTML = '';
+            }
+            
+            // Append the new message to our log window
+            messagesDiv.innerHTML += `<div>📥 ${data}</div>`;
+        };
+
+        // 3. Send a message to the server when the button is clicked
+        document.querySelector('button').onclick = () => {
+            socket.send('hello');
+        };
+    </script>
+</body>
+</html>
